@@ -15,17 +15,16 @@ namespace AirportTicketBookingExercise.Mappers
             Map(f => f.DepartureAirport).Index(4);
             Map(f => f.ArrivalAirport).Index(5);
             Map(f => f.ClassPrices).Convert(row =>
+
             {
                 var classPrices = new Dictionary<FlightClass, decimal>();
 
-                // Handle potential null value
                 var classPricesString = row.Row[6];
-                if (classPricesString != null)
+                if (!string.IsNullOrEmpty(classPricesString))
                 {
                     var classes = classPricesString.Split("-");
                     foreach (var classPrice in classes)
                     {
-                        // Assuming a CSV format like "Economy:100.00,Business:200.00"
                         var classPricePairs = classPrice.Split(',');
                         foreach (var classPricePair in classPricePairs)
                         {
@@ -42,19 +41,20 @@ namespace AirportTicketBookingExercise.Mappers
                                 }
                                 else
                                 {
-                                    // Log or throw an exception as needed
                                     Console.WriteLine($"Error parsing class price pair: {classPricePair}");
                                 }
                             }
                             else
                             {
-                                // Log or throw an exception as needed
                                 Console.WriteLine($"Unexpected format in class price pair: {classPricePair}");
                             }
                         }
                     }
                 }
-
+                else
+                {
+                    Console.WriteLine("ClassPrices string is null or empty.");
+                }
                 return classPrices;
             });
         }
