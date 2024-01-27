@@ -1,8 +1,16 @@
 ﻿using AirportTicketBookingExercise.Domain;
 using AirportTicketBookingExercise.Services;
 
-bool exitProgram = false;
+var exitProgram = false;
 FileService.InitializeFiles();
+var c = new Dictionary<FlightClass, decimal>
+{
+    { FlightClass.Economy, 500.00m },
+    { FlightClass.Business, 1000.00m },
+    { FlightClass.FirstClass, 1500.00m }
+};
+var flight = new Flight(111, "sddsf", "sdfsdf", new DateTime(), "sdfsdfsdf", "sdfsdf", c);
+Console.WriteLine(flight.ToString());
 
 while (!exitProgram)
 {
@@ -10,15 +18,18 @@ while (!exitProgram)
     {
         if (UserService.UserLoggedIn == null)
         {
-            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
             Console.WriteLine("Welcome to Airport Ticket Booking System");
+            Console.ResetColor();
             UserService.RunApplication();
         }
         else
         {
             Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"Welcome, {UserService.UserLoggedIn.UserName}!");
             Console.WriteLine($"User Type: {UserService.UserLoggedIn.Type}\n");
+            Console.ResetColor();
 
             if (UserService.UserLoggedIn.Type == UserType.Passenger)
             {
@@ -28,16 +39,17 @@ while (!exitProgram)
             {
                 DisplayService.DisplayManagerMenu();
             }
-
-            Console.WriteLine("Press any key to continue...");
-            Console.ReadKey();
         }
 
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        Console.WriteLine("Press any key to continue...");
+        Console.ReadKey();
         Console.Clear();
+        Console.ResetColor();
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"An error occurred: {ex.Message}");
+        DisplayService.DisplayErrorMessage($"An error occurred: {ex.Message}");
     }
 }
 
