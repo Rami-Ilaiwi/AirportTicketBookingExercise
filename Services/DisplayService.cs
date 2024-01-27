@@ -8,62 +8,55 @@ namespace AirportTicketBookingExercise.Services
     {
         public static void ShowAvailableFlightsSummary()
         {
-            Console.WriteLine("---------------------------------------------------------------------------");
+            Console.WriteLine(new string('-', 75));
             Console.WriteLine($"| {("Flight #"),-9} | {("Departure Date"),-15} | {("Departure Country"),-18} | {("Destination Country"),-20} |");
-            Console.WriteLine("---------------------------------------------------------------------------");
+            Console.WriteLine(new string('-', 75));
 
-            List<Flight> flights = FileService.ReadCsvFile<Flight>(Files.flightsFilePath, typeof(FlightMap));
+            var flights = FileService.ReadCsvFile<Flight>(Files.flightsFilePath, typeof(FlightMap));
 
             flights.ForEach(flight => Console.Write(flight.FlightSummary()));
         }
         public static void ShowAvailableFlightsDetail()
         {
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine(new string('-', 155));
             Console.WriteLine($"| {("Flight #"),-9} | {("Departure Date"),-15} | {("Departure Country"),-18} | {("Destination Country"),-20} | {("Departure Airport"),-17} | {("Arrival Airport"),-15} | {("Economy"),-11} | {("Business"),-11} | {("First Class"),-11} |");
-            Console.WriteLine("-----------------------------------------------------------------------------------------------------------------------------------------------------------");
+            Console.WriteLine(new string('-', 155));
 
-            List<Flight> flights = FileService.ReadCsvFile<Flight>(Files.flightsFilePath, typeof(FlightMap));
+            var flights = FileService.ReadCsvFile<Flight>(Files.flightsFilePath, typeof(FlightMap));
 
             foreach (Flight flight in flights)
             {
                 Console.WriteLine(flight);
             }
         }
+
         public static void ShowFlightClassesPrices(Flight flight)
         {
-            Console.WriteLine("----------------------------------");
+            Console.WriteLine(new string('-', 34));
             Console.WriteLine($"|{(""),-6}| {("Class"),-11} | {("Price"),-9} |");
-            Console.WriteLine("----------------------------------");
+            Console.WriteLine(new string('-', 34));
 
             var index = 1;
             FlightService.GetFlightClasses(flight)
                 .ToList()
                 .ForEach(classPrice => Console.WriteLine($"| #{(index++),-3} | {(classPrice.Key),-11} | {(classPrice.Value),-9} |"));
 
-            Console.WriteLine("----------------------------------");
+            Console.WriteLine(new string('-', 34));
         }
 
         public static void ShowBookingsForUser(User user)
         {
-            List<Booking> bookings = FileService.ReadCsvFile<Booking>(Files.bookingsFilePath, typeof(BookingMap));
-            List<Booking> userBookings = User.GetBookings().Where(booking => booking.UserId == user.Id).ToList();
+            var userBookings = BookingService.GetAllBookingsForUser(user);
 
-            if (userBookings.Any())
-            {
-                Console.WriteLine($"Your bookings:");
-                Console.WriteLine("--------------------------");
-                Console.WriteLine($"| {("Flight #"),-8} | {("Class"),-11} |");
-                Console.WriteLine("--------------------------");
+            Console.WriteLine($"Your bookings:");
+            Console.WriteLine(new string('-', 26));
+            Console.WriteLine($"| {("Flight #"),-8} | {("Class"),-11} |");
+            Console.WriteLine(new string('-', 26));
 
-                foreach (var booking in userBookings)
-                {
-                    Console.WriteLine($"| {(booking.FlightNumber),-8} | {(booking.FlightClass),-11} |");
-                    Console.WriteLine("--------------------------");
-                }
-            }
-            else
+            foreach (var booking in userBookings)
             {
-                Console.WriteLine($"No bookings found for UserId {user.Id}.");
+                Console.WriteLine($"| {(booking.FlightNumber),-8} | {(booking.FlightClass),-11} |");
+                Console.WriteLine(new string('-', 26));
             }
         }
 
@@ -97,7 +90,7 @@ namespace AirportTicketBookingExercise.Services
                     UserService.LogoutUser();
                     break;
                 default:
-                    Console.WriteLine("Wrong selection! Please enter a valid selection");
+                    DisplayErrorMessage("Wrong selection! Please enter a valid selection");
                     break;
             }
         }
@@ -128,7 +121,7 @@ namespace AirportTicketBookingExercise.Services
                     UserService.LogoutUser();
                     break;
                 default:
-                    Console.WriteLine("Wrong selection! Please enter a valid selection");
+                    DisplayErrorMessage("Wrong selection! Please enter a valid selection");
                     break;
             }
         }
@@ -143,7 +136,7 @@ namespace AirportTicketBookingExercise.Services
             Console.WriteLine("5: Departure Date");
             Console.WriteLine("6: Departure Airport");
             Console.WriteLine("7: Arrival Airport");
-            Console.WriteLine("8: Passenger");
+            Console.WriteLine("8: Passenger name");
             Console.WriteLine("9: Flight class");
             Console.WriteLine();
         }
@@ -156,5 +149,25 @@ namespace AirportTicketBookingExercise.Services
             }
         }
 
+        public static void DisplayErrorMessage(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+
+        public static void DisplaySuccessMessage(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+
+        public static void DisplayWarningMessage(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
     }
 }

@@ -8,15 +8,16 @@ namespace AirportTicketBookingExercise.Services
     {
         public static Flight GetFlight(int fn)
         {
-            List<Flight> flights = FileService.ReadCsvFile<Flight>(Files.flightsFilePath, typeof(FlightMap));
+            var flights = GetAllFlights();
             return flights.FirstOrDefault(f => f.FlightNumber == fn);
         }
 
-        public static Booking GetBooking(int bk)
+        public static bool DoesFlightExist(int fn)
         {
-            List<Booking> booking = FileService.ReadCsvFile<Booking>(Files.bookingsFilePath, typeof(BookingMap));
-            return booking.FirstOrDefault(b => b.FlightNumber == bk);
+            var flights = GetAllFlights();
+            return flights.Any(f => f.FlightNumber == fn);
         }
+
 
         public static Dictionary<FlightClass, decimal> GetFlightClasses(Flight flight)
         {
@@ -30,7 +31,7 @@ namespace AirportTicketBookingExercise.Services
 
         public static List<Flight> GetAllFlights()
         {
-            List<Flight> flights = FileService.ReadCsvFile<Flight>(Files.flightsFilePath, typeof(FlightMap));
+            var flights = FileService.ReadCsvFile<Flight>(Files.flightsFilePath, typeof(FlightMap));
             return flights;
         }
     }

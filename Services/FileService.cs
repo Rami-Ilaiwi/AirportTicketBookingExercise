@@ -152,7 +152,6 @@ namespace AirportTicketBookingExercise.Services
             var configuration = GetCsvConfiguration();
             var fullPath = Path.Combine(Files.directory, filePath);
 
-
             using (var writer = new StreamWriter(fullPath, append: true))
             using (var csv = new CsvWriter(writer, configuration))
             {
@@ -200,6 +199,11 @@ namespace AirportTicketBookingExercise.Services
             {
                 Console.WriteLine("Record not found for removal.");
             }
+        }
+
+        public static bool IsValidFilePath(string path)
+        {
+            return !string.IsNullOrWhiteSpace(path) && File.Exists(path);
         }
     }
 }
