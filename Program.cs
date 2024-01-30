@@ -3,6 +3,14 @@ using AirportTicketBookingExercise.Services;
 
 var exitProgram = false;
 FileService.InitializeFiles();
+var c = new Dictionary<FlightClass, decimal>
+{
+    { FlightClass.Economy, 500.00m },
+    { FlightClass.Business, 1000.00m },
+    { FlightClass.FirstClass, 1500.00m }
+};
+var flight = new Flight(111, "sddsf", "sdfsdf", new DateTime(), "sdfsdfsdf", "sdfsdf", c);
+Console.WriteLine(flight.ToString());
 
 while (!exitProgram)
 {
