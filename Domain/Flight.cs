@@ -36,28 +36,24 @@ namespace AirportTicketBookingExercise.Domain
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            var flightString = new string('-', 155) + "\n";
+            flightString += $"| {("Flight #"),-9} | {("Departure Date"),-15} | {("Departure Country"),-18} | {("Destination Country"),-20} | {("Departure Airport"),-17} | {("Arrival Airport"),-15} | {("Economy"),-11} | {("Business"),-11} | {("First Class"),-11} |\n";
+            flightString += new string('-', 155) + "\n";
 
-            sb.Append($"| {FlightNumber,-9} | {DepartureDate,-15:MM/dd/yyyy} | {DepartureCountry,-18} | {DestinationCountry,-20} | {DepartureAirport,-17} | {ArrivalAirport,-15} |");
-            foreach (var classPrice in ClassPrices)
-            {
-                sb.Append($" {classPrice.Value,-11} |");
-            }
+            flightString += $"| {FlightNumber,-9} | {DepartureDate,-15:MM/dd/yyyy} | {DepartureCountry,-18} | {DestinationCountry,-20} | {DepartureAirport,-17} | {ArrivalAirport,-15} |";
+            flightString += $" {string.Join(" | ", ClassPrices.Select(classPrice => $"{classPrice.Value,-11}"))} |";
 
-            sb.Append("\n-----------------------------------------------------------------------------------------------------------------------------------------------------------");
+            flightString += "\n" + new string('-', 155);
 
-
-            return sb.ToString();
+            return flightString;
         }
 
         public string FlightSummary()
         {
-            StringBuilder sb = new StringBuilder();
+            var flightString = $"| {FlightNumber,-9} | {DepartureDate,-15:MM/dd/yyyy} | {DepartureCountry,-18} | {DestinationCountry,-20} |\n";
+            flightString += new string('-', 75) + "\n";
 
-            sb.AppendLine($"| {FlightNumber,-9} | {DepartureDate,-15:MM/dd/yyyy} | {DepartureCountry,-18} | {DestinationCountry,-20} |");
-            sb.AppendLine("---------------------------------------------------------------------------");
-
-            return sb.ToString();
+            return flightString;
         }
     }
 }

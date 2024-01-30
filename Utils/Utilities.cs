@@ -6,7 +6,7 @@ namespace AirportTicketBookingExercise.Utils
 {
     public static class Utilities
     {
-        public static bool HasBookedFlight(int flightNumber)
+        private static bool HasBookedFlight(int flightNumber)
         {
             List<Booking> userBookings = FileService.ReadCsvFile<Booking>(Files.bookingsFilePath, typeof(BookingMap))
                 .Where(booking => booking.UserId == UserService.UserLoggedIn.Id && booking.FlightNumber == flightNumber)
@@ -15,76 +15,167 @@ namespace AirportTicketBookingExercise.Utils
             return userBookings.Any();
         }
 
-        public static void BookFlight(this User user)
+        private static bool ValidateFlightNumber(out int flightNumber)
         {
-            Console.WriteLine("Select your booking to update, please!\n");
-            DisplayService.ShowAvailableFlightsSummary();
-            var flightNumber = int.TryParse(Console.ReadLine(), out var fn);
+            Console.Write("Enter the flight number: ");
+            var isFlightNumberValid = int.TryParse(Console.ReadLine(), out flightNumber);
 
-            if (HasBookedFlight(fn))
+            if (!isFlightNumberValid || flightNumber <= 0)
             {
-                Console.WriteLine($"You have already booked Flight number {fn}. Cannot book the same flight again.");
-                return;
+                DisplayService.DisplayWarningMessage("Invalid input. Please enter a valid positive integer for the flight number.");
+                return false;
             }
 
-            var flight = FlightService.GetFlight(fn);
-            Console.WriteLine($"Select the Flight class for Flight number {fn}, please!");
-            DisplayService.ShowFlightClassesPrices(flight);
-            var readFlightClass = int.TryParse(Console.ReadLine(), out var fc);
-            var flightClass = FlightService.GetFlightClassByIndex(flight, fc);
-            user.BookFlight(flight, flightClass, user);
+            return true;
+        }
+
+        private static bool ValidateFlightClassIndex(Flight flight, out int flightClassIndex)
+        {
+            Console.Write("Enter the flight class index: ");
+            var isFlightClassIndexValid = int.TryParse(Console.ReadLine(), out flightClassIndex);
+
+            if (!isFlightClassIndexValid || flightClassIndex < 1 || flightClassIndex > 3)
+            {
+                DisplayService.DisplayWarningMessage("Invalid input. Please enter a valid index between 1 and 3 for the flight class.");
+                return false;
+            }
+
+            return true;
+        }
+
+        public static void BookFlight(this User user)
+        {
+            try
+            {
+                Console.WriteLine("Select the flight number to book, please!\n");
+                DisplayService.ShowAvailableFlightsSummary();
+
+                if (!ValidateFlightNumber(out var flightNumber))
+                    return;
+
+                if (!FlightService.DoesFlightExist(flightNumber))
+                {
+                    DisplayService.DisplayWarningMessage($"Flight number {flightNumber} not found. Please enter a valid flight number.");
+                    return;
+                }
+
+                if (HasBookedFlight(flightNumber))
+                {
+                    DisplayService.DisplayWarningMessage($"You have already booked Flight number {flightNumber}. Cannot book the same flight again.");
+                    return;
+                }
+
+                var flight = FlightService.GetFlight(flightNumber);
+                Console.WriteLine($"Select the Flight class for Flight number {flightNumber}, please!");
+                DisplayService.ShowFlightClassesPrices(flight);
+
+                if (!ValidateFlightClassIndex(flight, out var flightClassIndex))
+                    return;
+
+                var flightClass = FlightService.GetFlightClassByIndex(flight, flightClassIndex);
+                user.BookFlight(flight, flightClass, user);
+            }
+            finally
+            {
+                Console.ResetColor();
+            }
         }
 
         public static void ModifyBooking(this User user)
         {
-            Console.WriteLine("Select a booking to update, please!\n");
-            DisplayService.ShowBookingsForUser(user);
-            var flightNumber = int.TryParse(Console.ReadLine(), out var fn);
-            var flight = FlightService.GetFlight(fn);
-            Console.WriteLine($"Select the Flight class for Flight number {fn} to update your booking, please!");
-            DisplayService.ShowFlightClassesPrices(flight);
-            var booking = FlightService.GetBooking(fn);
-            var readFlightClass = int.TryParse(Console.ReadLine(), out var fc);
-            var newFlightClass = FlightService.GetFlightClassByIndex(flight, fc);
-            user.UpdateBookingRecord(flight, newFlightClass, booking);
+            try
+            {
+
+                if (BookingService.DoesUserHasBookings(user))
+                {
+                    Console.WriteLine("Select a booking to update, please!\n");
+                    DisplayService.ShowBookingsForUser(user);
+                    if (!ValidateFlightNumber(out var flightNumber))
+                        return;
+
+                    if (!FlightService.DoesFlightExist(flightNumber))
+                    {
+                        DisplayService.DisplayWarningMessage($"Flight number {flightNumber} not found. Please enter a valid flight number.");
+                        return;
+                    }
+
+                    if (!BookingService.DoesFlightBookedForUser(user, flightNumber))
+                    {
+                        DisplayService.DisplayWarningMessage($"Flight number {flightNumber} is not booked for the UserId {user.Id}.");
+                        return;
+                    }
+
+                    var flight = FlightService.GetFlight(flightNumber);
+
+                    Console.WriteLine($"Select the Flight class for Flight number {flightNumber} to update your booking, please!");
+                    DisplayService.ShowFlightClassesPrices(flight);
+                    var booking = BookingService.GetBooking(flightNumber);
+                    if (!ValidateFlightClassIndex(flight, out var flightClassIndex))
+                        return;
+                    var newFlightClass = FlightService.GetFlightClassByIndex(flight, flightClassIndex);
+                    user.UpdateBookingRecord(flight, newFlightClass, booking);
+                }
+                else
+                {
+                    DisplayService.DisplayWarningMessage($"No bookings found for UserId {user.Id}.");
+                }
+            }
+            finally
+            {
+                Console.ResetColor();
+            }
         }
 
         public static void CancelBooking(this User user)
         {
-            Console.WriteLine("Select a booking to remove, please!\n");
-            DisplayService.ShowBookingsForUser(user);
-            var flightNumber = int.TryParse(Console.ReadLine(), out var fn);
-            var flight = FlightService.GetFlight(fn);
-            var booking = FlightService.GetBooking(fn);
-            user.RemoveBookingRecord(booking);
+            if (BookingService.DoesUserHasBookings(user))
+            {
+                Console.WriteLine("Select a booking to cancel, please!\n");
+                DisplayService.ShowBookingsForUser(user);
+                if (!ValidateFlightNumber(out var flightNumber))
+                    return;
+
+                if (!FlightService.DoesFlightExist(flightNumber))
+                {
+                    DisplayService.DisplayWarningMessage($"Flight number {flightNumber} not found. Please enter a valid flight number.");
+                    return;
+                }
+
+                if (!BookingService.DoesFlightBookedForUser(user, flightNumber))
+                {
+                    DisplayService.DisplayWarningMessage($"Flight number {flightNumber} is not booked for the UserId {user.Id}.");
+                    return;
+                }
+                var booking = BookingService.GetBooking(flightNumber);
+                user.RemoveBookingRecord(booking);
+            }
+            else
+            {
+                DisplayService.DisplayWarningMessage($"No bookings found for UserId {user.Id}.");
+            }
         }
 
         public static void ViewPersonalBookings(this User user)
         {
-            List<Booking> userBookings = User.GetBookings().Where(booking => booking.UserId == user.Id).ToList();
-
-            if (userBookings.Any())
+            if (BookingService.DoesUserHasBookings(user))
             {
-                Console.WriteLine("Here are your bookings!\n");
+
                 DisplayService.ShowBookingsForUser(user);
             }
             else
             {
-                Console.WriteLine("There are no bookings to show.");
+                DisplayService.DisplayWarningMessage($"No bookings found for UserId {user.Id}.");
             }
         }
 
         public static void FilterBooking()
         {
-            var bookings = User.GetBookings();
+            var bookings = BookingService.GetAllBookings();
             DisplayService.ShowFilterBookingsOptions();
             Console.Write("Your selection: ");
             string selection = Console.ReadLine();
-            Console.Write("Enter filter value: ");
-            string userInput = Console.ReadLine();
-            Console.WriteLine();
 
-            var filteredBookings = User.FilterBookings(bookings, selection, userInput);
+            var filteredBookings = User.FilterBookings(bookings, selection);
             DisplayService.ShowFilteredBookings(filteredBookings);
         }
 
@@ -92,8 +183,13 @@ namespace AirportTicketBookingExercise.Utils
         {
             Console.Write("Enter the path of the CSV file for batch flight upload: ");
             string filePath = Console.ReadLine();
+            if (!FileService.IsValidFilePath(filePath))
+            {
+                Console.WriteLine("Invalid path.");
+                return;
+            }
 
-            List<Flight> flights = FileService.ReadCsvFile<Flight>(filePath, typeof(FlightMap));
+            var flights = FlightService.GetAllFlights();
             var result = User.BatchFlightUpload(flights);
 
             if (result.ValidFlights.Any())
@@ -128,9 +224,13 @@ namespace AirportTicketBookingExercise.Utils
         {
             Console.Write("Enter file directory to save: ");
             string fileDirectory = Console.ReadLine();
+            if (!FileService.IsValidFilePath(fileDirectory))
+            {
+                Console.WriteLine("Invalid path.");
+                return;
+            }
 
             FileService.ImportFlightFile(fileDirectory);
         }
-
     }
 }
