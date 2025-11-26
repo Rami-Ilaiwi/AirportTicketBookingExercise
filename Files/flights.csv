@@ -1,0 +1,7 @@
+FlightNumber,DepartureCountry,DestinationCountry,DepartureDate,DepartureAirport,ArrivalAirport,ClassPrices
+11,Jordan,Turkey,04/05/2023,Alia Airport,Turkish Airport,Economy;2000-Business;3000-FirstClass;4000
+22,Turkey,Jordan,04/05/2023,Alia Airport,Turkish Airport,Economy;2000-Business;3000-FirstClass;4000
+33,Jordan,Libya,04/05/2023,Alia Airport,Turkish Airport,Economy;1000-Business;2000-FirstClass;3000
+44,Libya,Jordan,04/05/2023,Alia Airport,Turkish Airport,Economy;1000-Business;2000-FirstClass;3000
+55,Lebanon,Turkey,04/05/2023,Alia Airport,Turkish Airport,Economy;3000-Business;4000-FirstClass;5000
+66,Turkey,Lebanon,04/05/2023,Alia Airport,Turkish Airport,Economy;3000-Business;4000-FirstClass;5000
