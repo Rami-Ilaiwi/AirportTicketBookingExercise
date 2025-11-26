@@ -44,6 +44,7 @@ namespace AirportTicketBookingExercise.Services
 
         public static void RunApplication()
         {
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Login System");
 
             List<User> users = FileService.ReadCsvFile<User>(Files.usersFilePath, typeof(UserMap));
@@ -52,19 +53,34 @@ namespace AirportTicketBookingExercise.Services
 
             if (UserLoggedIn != null)
             {
-                Console.WriteLine($"Login successful. Welcome, {UserLoggedIn.UserName}!");
-                Console.WriteLine($"User Type: {UserLoggedIn.Type}");
+
+                int width = Math.Max(UserLoggedIn.UserName.Length, UserLoggedIn.Type.ToString().Length) + 29;
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
+                Console.WriteLine($"╔{new string('═', width)}╗");
+                Console.WriteLine($"║  Login successful. Welcome, {UserLoggedIn.UserName}!".PadRight(width) + " ║");
+                Console.WriteLine($"║  User Type: {UserLoggedIn.Type}".PadRight(width) + " ║");
+                Console.WriteLine($"╚{new string('═', width)}╝");
+                Console.ResetColor();
             }
             else
             {
-                Console.WriteLine("Login failed. Invalid credentials.");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("╔══════════════════════════╗");
+                Console.WriteLine("║   Login failed.          ║");
+                Console.WriteLine("║   Invalid credentials.   ║");
+                Console.WriteLine("╚══════════════════════════╝");
+                Console.ResetColor();
             }
         }
 
         public static void LogoutUser()
         {
             UserLoggedIn = null;
-            Console.WriteLine("Logged out successfully.");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("╔══════════════════════════════╗");
+            Console.WriteLine("║   Logged out successfully.   ║");
+            Console.WriteLine("╚══════════════════════════════╝");
+            Console.ResetColor();
         }
     }
 }

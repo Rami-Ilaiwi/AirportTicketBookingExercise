@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AirportTicketBookingExercise.Domain
+﻿namespace AirportTicketBookingExercise.Domain
 {
     public enum FlightClass
     {
-        Economy,
-        Business,
-        FirstClass,
+        Economy = 0,
+        Business = 1,
+        FirstClass = 2,
     }
 }
