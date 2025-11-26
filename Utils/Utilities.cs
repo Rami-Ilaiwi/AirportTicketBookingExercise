@@ -2,15 +2,13 @@
 using AirportTicketBookingExercise.Mappers;
 using AirportTicketBookingExercise.Services;
 
-namespace AirportTicketBookingExercise
+namespace AirportTicketBookingExercise.Utils
 {
     public static class Utilities
     {
-        private static readonly string bookingsFilePath = "bookings.csv";
-
         public static bool HasBookedFlight(int flightNumber)
         {
-            List<Booking> userBookings = FileService.ReadCsvFile<Booking>(Utilities.bookingsFilePath, typeof(BookingMap))
+            List<Booking> userBookings = FileService.ReadCsvFile<Booking>(Files.bookingsFilePath, typeof(BookingMap))
                 .Where(booking => booking.UserId == UserService.UserLoggedIn.Id && booking.FlightNumber == flightNumber)
                 .ToList();
 
@@ -75,5 +73,64 @@ namespace AirportTicketBookingExercise
                 Console.WriteLine("There are no bookings to show.");
             }
         }
+
+        public static void FilterBooking()
+        {
+            var bookings = User.GetBookings();
+            DisplayService.ShowFilterBookingsOptions();
+            Console.Write("Your selection: ");
+            string selection = Console.ReadLine();
+            Console.Write("Enter filter value: ");
+            string userInput = Console.ReadLine();
+            Console.WriteLine();
+
+            var filteredBookings = User.FilterBookings(bookings, selection, userInput);
+            DisplayService.ShowFilteredBookings(filteredBookings);
+        }
+
+        public static void ProcessBatchUpload()
+        {
+            Console.Write("Enter the path of the CSV file for batch flight upload: ");
+            string filePath = Console.ReadLine();
+
+            List<Flight> flights = FileService.ReadCsvFile<Flight>(filePath, typeof(FlightMap));
+            var result = User.BatchFlightUpload(flights);
+
+            if (result.ValidFlights.Any())
+            {
+                FileService.AppendCsvFlightRecord<Flight>(Files.flightsFilePath, result.ValidFlights);
+                Console.WriteLine($"{result.ValidFlights.Count} flights have been added successfully.");
+            }
+
+            if (result.InvalidFlights.Any())
+            {
+                Console.WriteLine($"{result.InvalidFlights.Count} flights have not been added successfully. Validation errors:");
+
+                foreach (var error in result.InvalidFlights)
+                {
+                    Console.WriteLine($"- Error at line {error.Index + 1}: {error.Error}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"All {flights.Count} flights have been added successfully.");
+            }
+        }
+
+        public static string ConvertDictionaryToString(Dictionary<FlightClass, decimal> classPrices)
+        {
+            string result = string.Join("-", classPrices.Select(kv => $"{kv.Key};{kv.Value}"));
+
+            return result;
+        }
+
+        public static void ExportFlightImportFile()
+        {
+            Console.Write("Enter file directory to save: ");
+            string fileDirectory = Console.ReadLine();
+
+            FileService.ImportFlightFile(fileDirectory);
+        }
+
     }
 }

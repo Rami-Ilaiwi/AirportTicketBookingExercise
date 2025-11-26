@@ -20,6 +20,20 @@ namespace AirportTicketBookingExercise.Domain
         [Index(6)]
         public Dictionary<FlightClass, decimal> ClassPrices { get; set; }
 
+        public Flight() { }
+
+        public Flight(int flightNumber, string departureCountry, string destinationCountry, DateTime departureDate,
+                      string departureAirport, string arrivalAirport, Dictionary<FlightClass, decimal> classPrices)
+        {
+            FlightNumber = flightNumber;
+            DepartureCountry = departureCountry;
+            DestinationCountry = destinationCountry;
+            DepartureDate = departureDate;
+            DepartureAirport = departureAirport;
+            ArrivalAirport = arrivalAirport;
+            ClassPrices = classPrices;
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
